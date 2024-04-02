@@ -4,7 +4,6 @@
 package storage
 
 import (
-	"code.gitea.io/gitea/modules/structs"
 	"context"
 	"crypto/tls"
 	"fmt"
@@ -16,12 +15,15 @@ import (
 	"strings"
 	"time"
 
+	"code.gitea.io/gitea/modules/structs"
+
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -182,6 +184,9 @@ func (m *MinioStorage) Open(path string) (Object, error) {
 
 // Save saves a file to minio
 func (m *MinioStorage) Save(path string, r io.Reader, size int64) (int64, error) {
+	logrus.Info("*******************")
+	logrus.Infof("MinioStorage: %v", &m)
+	logrus.Info("MinioStorage Save")
 	uploadInfo, err := m.client.PutObject(
 		m.ctx,
 		m.bucket,
@@ -197,6 +202,8 @@ func (m *MinioStorage) Save(path string, r io.Reader, size int64) (int64, error)
 			SendContentMd5: m.cfg.ChecksumAlgorithm == "md5",
 		},
 	)
+	logrus.Info("*******************")
+	logrus.Infof("PutObject.err: %v", err)
 	if err != nil {
 		return 0, convertMinioErr(err)
 	}

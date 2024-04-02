@@ -4,13 +4,15 @@
 package storage
 
 import (
-	"code.gitea.io/gitea/modules/structs"
 	"context"
 	"fmt"
 	"io"
 	"net/url"
 	"os"
 	"path/filepath"
+
+	"code.gitea.io/gitea/modules/structs"
+	"github.com/sirupsen/logrus"
 
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
@@ -69,6 +71,8 @@ func (l *LocalStorage) Open(path string) (Object, error) {
 
 // Save a file
 func (l *LocalStorage) Save(path string, r io.Reader, size int64) (int64, error) {
+	logrus.Info("*******************")
+	logrus.Info("localStorage Save")
 	p := l.buildLocalPath(path)
 	if err := os.MkdirAll(filepath.Dir(p), os.ModePerm); err != nil {
 		return 0, err

@@ -4,11 +4,13 @@
 package storage
 
 import (
-	"code.gitea.io/gitea/modules/structs"
 	"fmt"
 	"io"
 	"net/url"
 	"os"
+
+	"code.gitea.io/gitea/modules/structs"
+	"github.com/sirupsen/logrus"
 )
 
 var uninitializedStorage = discardStorage("uninitialized storage")
@@ -28,6 +30,8 @@ func (s discardStorage) Open(_ string) (Object, error) {
 }
 
 func (s discardStorage) Save(_ string, _ io.Reader, _ int64) (int64, error) {
+	logrus.Info("*******************")
+	logrus.Info("discardStorage Save")
 	return 0, fmt.Errorf("%s", s)
 }
 

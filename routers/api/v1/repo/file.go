@@ -33,6 +33,7 @@ import (
 	"code.gitea.io/gitea/routers/web/statmiddleware"
 	archiver_service "code.gitea.io/gitea/services/repository/archiver"
 	files_service "code.gitea.io/gitea/services/repository/files"
+	"github.com/sirupsen/logrus"
 )
 
 const giteaObjectTypeHeader = "X-Gitea-Object-Type"
@@ -456,6 +457,8 @@ func ChangeFiles(ctx *context.APIContext) {
 	//     "$ref": "#/responses/error"
 	//   "423":
 	//     "$ref": "#/responses/repoArchivedError"
+	logrus.Info("*********************************")
+	logrus.Info("start contents api")
 
 	apiOpts := web.GetForm(ctx).(*api.ChangeFilesOptions)
 
@@ -465,6 +468,8 @@ func ChangeFiles(ctx *context.APIContext) {
 
 	var files []*files_service.ChangeRepoFile
 	for _, file := range apiOpts.Files {
+		logrus.Info("*********************************")
+		logrus.Infof("file.Path ; %v, file.SHA: %v", file.Path, file.SHA)
 		contentReader, err := base64Reader(file.ContentBase64)
 		if err != nil {
 			ctx.Error(http.StatusUnprocessableEntity, "Invalid base64 content", err)
@@ -519,6 +524,8 @@ func ChangeFiles(ctx *context.APIContext) {
 	}
 
 	if filesResponse, err := createOrUpdateFiles(ctx, opts); err != nil {
+		logrus.Info("*********************************")
+		logrus.Infof("response err: %v", err)
 		handleCreateOrUpdateFileError(ctx, err)
 	} else {
 		ctx.JSON(http.StatusCreated, filesResponse)

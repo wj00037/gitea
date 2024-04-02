@@ -21,6 +21,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
 	asymkey_service "code.gitea.io/gitea/services/asymkey"
+	"github.com/sirupsen/logrus"
 )
 
 // IdentityOptions for a person's identity like an author or committer
@@ -221,6 +222,8 @@ func ChangeRepoFiles(ctx context.Context, repo *repo_model.Repository, doer *use
 	for _, file := range opts.Files {
 		switch file.Operation {
 		case "create", "update":
+			logrus.Info("*********************************")
+			logrus.Infof("file.Opt: %v", file.Operation)
 			if err := CreateOrUpdateFile(ctx, t, file, contentStore, repo.ID, hasOldBranch); err != nil {
 				return nil, err
 			}
@@ -411,6 +414,8 @@ func CreateOrUpdateFile(ctx context.Context, t *TemporaryUploadRepository, file 
 		if filename2attribute2info[file.Options.treePath] != nil && filename2attribute2info[file.Options.treePath]["filter"] == "lfs" {
 			// OK so we are supposed to LFS this data!
 			pointer, err := lfs.GeneratePointer(treeObjectContentReader)
+			logrus.Info("*********************************")
+			logrus.Infof("pointer.Oid  Size: %v, %v", pointer.Oid, pointer.Size)
 			if err != nil {
 				return err
 			}
@@ -443,6 +448,8 @@ func CreateOrUpdateFile(ctx context.Context, t *TemporaryUploadRepository, file 
 			return err
 		}
 		exist, err := contentStore.Exists(lfsMetaObject.Pointer)
+		logrus.Info("*********************************")
+		logrus.Infof("exist: %v, err: %v", exist, err)
 		if err != nil {
 			return err
 		}

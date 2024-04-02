@@ -4,17 +4,19 @@
 package lfs
 
 import (
-	"code.gitea.io/gitea/modules/structs"
 	"encoding/hex"
 	"errors"
 	"hash"
 	"io"
 	"os"
 
+	"code.gitea.io/gitea/modules/structs"
+
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/storage"
 
 	"github.com/minio/sha256-simd"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -52,10 +54,15 @@ func (s *ContentStore) Put(pointer Pointer, r io.Reader) error {
 
 	// Wrap the provided reader with an inline hashing and size checker
 	wrappedRd := newHashingReader(pointer.Size, pointer.Oid, r)
+	logrus.Info("*******************")
+	logrus.Infof("wrappedRd: %v", wrappedRd)
 
 	// now pass the wrapped reader to Save - if there is a size mismatch or hash mismatch then
 	// the errors returned by the newHashingReader should percolate up to here
 	written, err := s.Save(p, wrappedRd, pointer.Size)
+	logrus.Info("*******************")
+	logrus.Infof("written: %v; pointer.Size: %v", written, pointer.Size)
+	logrus.Infof("pointer: %v", pointer)
 	if err != nil {
 		log.Error("Whilst putting LFS OID[%s]: Failed to copy to tmpPath: %s Error: %v", pointer.Oid, p, err)
 		return err
@@ -69,7 +76,7 @@ func (s *ContentStore) Put(pointer Pointer, r io.Reader) error {
 		err = ErrSizeMismatch
 	}
 
-	// if the upload failed, try to delete the file
+	// // if the upload failed, try to delete the file
 	if err != nil {
 		if errDel := s.Delete(p); errDel != nil {
 			log.Error("Cleaning the LFS OID[%s] failed: %v", pointer.Oid, errDel)
@@ -171,6 +178,7 @@ func (r *hashingReader) Read(b []byte) (int, error) {
 
 	if errors.Is(err, io.EOF) || r.currentSize >= r.expectedSize {
 		if r.currentSize != r.expectedSize {
+			logrus.Infof("currentSize: %v, expectedSize: %v", r.currentSize, r.expectedSize)
 			return n, r.recordError(ErrSizeMismatch)
 		}
 

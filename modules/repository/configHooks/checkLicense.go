@@ -15,8 +15,8 @@ import (
 
 // CheckLicense for check license
 type CheckLicense struct {
-	 Name string
-	 Content string
+	Name    string
+	Content string
 }
 
 // GetHookName for check license name
@@ -36,7 +36,7 @@ while read oldrev newrev _; do
 	files=$(git diff --name-only $oldrev $newrev)
   if echo "$files" | grep -q "README.md"; then
 		readme_content=$(git show $newrev:README.md)
-		license=$(echo "$readme_content" | grep -oP "license:\s*\K\S+")
+		license=$(echo "$readme_content" | grep -oP -m 1 "license:\s*\K\S+")
 		if [[ " ${valid_licenses[@]} " =~ " ${license} " ]]; then
 				echo "License field is valid. Proceeding with the push."
 		else
@@ -50,5 +50,3 @@ done
 	}
 	return c.Content
 }
-
-

@@ -114,9 +114,14 @@ var OAuth2 = struct {
 }
 
 func loadOAuth2From(rootCfg ConfigProvider) {
-	if err := rootCfg.Section("oauth2").MapTo(&OAuth2); err != nil {
-		log.Fatal("Failed to OAuth2 settings: %v", err)
+	sec := rootCfg.Section("oauth2")
+	if err := sec.MapTo(&OAuth2); err != nil {
+		log.Fatal("Failed to map OAuth2 settings: %v", err)
 		return
+	}
+
+	if sec.HasKey("DEFAULT_APPLICATIONS") && sec.Key("DEFAULT_APPLICATIONS").String() == "" {
+		OAuth2.DefaultApplications = nil
 	}
 
 	if !OAuth2.Enable {

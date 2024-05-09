@@ -22,7 +22,7 @@ func requireSignIn(ctx *context.Context) {
 	// rely on the results of Contexter
 	if !ctx.IsSigned {
 		// TODO: support digit auth - which would be Authorization header with digit
-		ctx.Resp.Header().Set("WWW-Authenticate", `Basic realm="Gitea"`)
+		ctx.Resp.Header().Set("WWW-Authenticate", `Basic realm="openmind"`)
 		ctx.Error(http.StatusUnauthorized)
 	}
 }

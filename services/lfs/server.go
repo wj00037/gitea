@@ -4,7 +4,6 @@
 package lfs
 
 import (
-	"code.gitea.io/gitea/modules/structs"
 	stdCtx "context"
 	"encoding/base64"
 	"encoding/hex"
@@ -17,6 +16,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"code.gitea.io/gitea/modules/structs"
 
 	actions_model "code.gitea.io/gitea/models/actions"
 	auth_model "code.gitea.io/gitea/models/auth"
@@ -941,6 +942,6 @@ func parseToken(ctx *context.Context, authorization string, target *repo_model.R
 }
 
 func requireAuth(ctx *context.Context) {
-	ctx.Resp.Header().Set("WWW-Authenticate", "Basic realm=gitea-lfs")
+	ctx.Resp.Header().Set("WWW-Authenticate", "Basic realm=openmind-lfs")
 	writeStatus(ctx, http.StatusUnauthorized)
 }

@@ -173,6 +173,7 @@ func GetCommitContents(
 	if p, b := isLFS(entry); b {
 		contentsResponse.Size = p.Size
 		contentsResponse.IsLFS = true
+		contentsResponse.SHA = p.Oid
 	}
 
 	// Now populate the rest of the ContentsResponse based on entry type

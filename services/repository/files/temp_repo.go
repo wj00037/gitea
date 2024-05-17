@@ -505,7 +505,8 @@ func (t *TemporaryUploadRepository) ModifyAttributeFile(filePath, branchName str
 
 	if !patternFound {
 		// If the fileName pattern is not specified, add it with LFS attributes to the end of .gitattributes
-		lfsAttributes := fileName + " filter=lfs diff=lfs merge=lfs -text"
+		lfsAttributes := strings.ReplaceAll(fileName, " ", "[[:space:]]") + " filter=lfs diff=lfs merge=lfs -text"
+
 		newContent := strings.TrimSpace(string(content)) + "\n" + lfsAttributes + "\n"
 		err = os.WriteFile(gitAttributesPath, []byte(newContent), 0644)
 		if err != nil {

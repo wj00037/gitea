@@ -232,6 +232,23 @@ func GetLFSMetaObjects(ctx context.Context, repoID int64, page, pageSize int) ([
 	return lfsObjects, sess.Find(&lfsObjects, &LFSMetaObject{RepositoryID: repoID})
 }
 
+// GetAllLFSMetaObjects returns all LFSMetaObjects associated with a repository
+func GetAllLFSMetaObjects(ctx context.Context, repoID int64) ([]*LFSMetaObject, error) {
+	sess := db.GetEngine(ctx)
+
+	lfsObjects := make([]*LFSMetaObject, 0)
+	return lfsObjects, sess.Find(&lfsObjects, &LFSMetaObject{RepositoryID: repoID})
+}
+
+func ContainsLFSMetaObject(slice []*LFSMetaObject, id string) *LFSMetaObject {
+	for _, item := range slice {
+		if item != nil && item.Oid == id {
+			return item
+		}
+	}
+	return nil
+}
+
 // CountLFSMetaObjects returns a count of all LFSMetaObjects associated with a repository
 func CountLFSMetaObjects(ctx context.Context, repoID int64) (int64, error) {
 	return db.GetEngine(ctx).Count(&LFSMetaObject{RepositoryID: repoID})

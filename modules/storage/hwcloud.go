@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/huaweicloud/huaweicloud-sdk-go-obs/obs"
+	"github.com/minio/minio-go/v7"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -250,6 +251,18 @@ func (hwc *HWCloudStorage) URL(path, name string) (*url.URL, error) {
 	}
 
 	return v, err
+}
+
+// IterateObjectsKeyOnly iterates across the objects' name only in the miniostorage
+func (hwc *HWCloudStorage) IterateObjectsKeyOnly(path string, fn func(path string) error) error {
+	for mObjInfo := range hwc.client.ListObjects(hwc.ctx, hwc.bucket, minio.ListObjectsOptions{
+		Prefix:    "",
+		Recursive: true,
+		MaxKeys:   500,
+	}) {
+		return fn(mObjInfo.Key)
+	}
+	return nil
 }
 
 func init() {

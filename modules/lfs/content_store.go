@@ -91,6 +91,30 @@ func (s *ContentStore) Exists(pointer Pointer) (bool, error) {
 	return true, nil
 }
 
+// PointersExists checks if each pointer exists in the object storage.
+func (s *ContentStore) PointersExists(pointers []Pointer) (map[string]bool, error) {
+	// Create a map to track the existence of pointers.
+	existenceMap := make(map[string]bool)
+	for _, pointer := range pointers {
+		existenceMap[pointer.Oid] = false
+	}
+
+	// Iterate through all objects in the storage.
+	if err := s.IterateObjectsKeyOnly("", func(p string) error {
+
+		// Check if the object's SHA256 is one of the pointers.
+		if _, exists := existenceMap[p]; exists {
+			existenceMap[p] = true
+		}
+		return nil
+	}); err != nil {
+		log.Error("Error while iterating storage: %v", err)
+		return nil, err
+	}
+
+	return existenceMap, nil
+}
+
 // Verify returns true if the object exists in the content store and size is correct.
 func (s *ContentStore) Verify(pointer Pointer) (bool, error) {
 	p := pointer.RelativePath()

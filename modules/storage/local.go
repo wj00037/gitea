@@ -158,6 +158,10 @@ func (l *LocalStorage) IterateObjects(dirName string, fn func(path string, obj O
 	})
 }
 
+func (l *LocalStorage) IterateObjectsKeyOnly(path string, fn func(path string) error) error {
+	panic("not implemented")
+}
+
 func init() {
 	RegisterStorageType(setting.LocalStorageType, NewLocalStorage)
 }

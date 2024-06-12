@@ -253,6 +253,29 @@ func MultipartBatchHandler(ctx *context.Context, br *lfs_module.BatchRequest) {
 	contentStore := lfs_module.NewContentStore()
 
 	var responseObjects []*lfs_module.ObjectResponseWithMultipart
+	metas, err := git_model.GetAllLFSMetaObjects(ctx, repository.ID)
+	if err != nil {
+		log.Error("Unable to check all the LFS meta data. Error: %v", err)
+		writeStatus(ctx, http.StatusInternalServerError)
+		return
+	}
+
+	pointersExistenceMap, err := contentStore.PointersExists(br.Objects)
+	if err != nil {
+		log.Error("Fail to generate pointersExistenceMap. Error: %v", err)
+		writeStatus(ctx, http.StatusInternalServerError)
+		return
+	}
+
+	metas, err := git_model.GetAllLFSMetaObjects(ctx, repository.ID)
+
+	if err != nil {
+		log.Error("Unable to check all the LFS meta data. Error: %v", err)
+		writeStatus(ctx, http.StatusInternalServerError)
+		return
+	}
+
+	pointersExistenceMap, err := contentStore.PointersExists(br.Objects)
 
 	for _, p := range br.Objects {
 		if !p.IsValid() {
@@ -263,14 +286,9 @@ func MultipartBatchHandler(ctx *context.Context, br *lfs_module.BatchRequest) {
 			continue
 		}
 
-		exists, err := contentStore.Exists(p)
-		if err != nil {
-			log.Error("Unable to check if LFS OID[%s] exist. Error: %v", p.Oid, rc.User, rc.Repo, err)
-			writeStatus(ctx, http.StatusInternalServerError)
-			return
-		}
+		meta := git_model.ContainsLFSMetaObject(metas, p.Oid)
+		exists := pointersExistenceMap[p.Oid]
 
-		meta, err := git_model.GetLFSMetaObjectByOid(ctx, repository.ID, p.Oid)
 		if err != nil && err != git_model.ErrLFSObjectNotExist {
 			log.Error("Unable to get LFS MetaObject [%s] for %s/%s. Error: %v", p.Oid, rc.User, rc.Repo, err)
 			writeStatus(ctx, http.StatusInternalServerError)

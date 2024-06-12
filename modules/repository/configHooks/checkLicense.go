@@ -45,8 +45,21 @@ while read oldrev newrev _; do
 	files=$(git diff --name-only $oldrev $newrev)
   if echo "$files" | grep -q "README.md"; then
 		readme_content=$(git show $newrev:README.md)
-		license=$(echo "$readme_content" | grep -oP -m 1 "license:\s*\K\S+")
-		if [[ " ${valid_licenses[@]} " =~ " ${license} " ]]; then
+		license=$(echo "$readme_content" | grep -ozP -m 1 "license:\s*\K\S+")
+		log_error "--->License:"
+		echo "--->2License: ${license}."
+		if [[ ${license} = "-" ]]; then
+			license=$(echo "$readme_content" | grep -ozP -m 1 "^license:\s*(\s+-.+\n{1})+")
+			echo "---->1License: ${license}."
+			declare -a arr
+			eval license=$(echo "$license" | awk -F '-' {a[NR]=$2} END {for(i in a) print "arr["i"]="a[i]}')
+			echo "new license: ${#arr[*]}."
+			for i in "${!arr[@]}"; do
+				echo "new_license[$i] =  ${arr[$i]}"
+			done
+			log_operation "1license check | failed"
+			exit 1
+		elif [[ " ${valid_licenses[@]} " =~ " ${license} " ]]; then
 				echo "License field is valid. Proceeding with the push."
 				log_operation "license check | success"
 		else
@@ -60,13 +73,13 @@ while read oldrev newrev _; do
   fi
 done
 `, shellLicense,
-time.Now().Format(timeLayout),
-prefix,
-time.Now().Format(timeLayout),
-user,
-ip,
-method,
-)
+			time.Now().Format(timeLayout),
+			prefix,
+			time.Now().Format(timeLayout),
+			user,
+			ip,
+			method,
+		)
 	}
 	return c.Content
 }

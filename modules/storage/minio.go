@@ -282,6 +282,10 @@ func (m *MinioStorage) IterateObjects(dirName string, fn func(path string, obj O
 	return nil
 }
 
+func (m *MinioStorage) IterateObjectsKeyOnly(path string, fn func(path string) error) error {
+	panic("not implemented")
+}
+
 func init() {
 	RegisterStorageType(setting.MinioStorageType, newMinioStorage)
 }

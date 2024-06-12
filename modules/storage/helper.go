@@ -46,3 +46,8 @@ func (s discardStorage) URL(_, _ string) (*url.URL, error) {
 func (s discardStorage) IterateObjects(_ string, _ func(string, Object) error) error {
 	return fmt.Errorf("%s", s)
 }
+
+// IterateObjectsKeyOnly iterates across the objects' name only in the miniostorage
+func (s discardStorage) IterateObjectsKeyOnly(path string, fn func(path string) error) error {
+	panic("not implemented")
+}

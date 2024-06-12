@@ -70,6 +70,7 @@ type ObjectStorage interface {
 	GenerateMultipartParts(path string, size int64) (parts []*structs.MultipartObjectPart, abort *structs.MultipartEndpoint, verify *structs.MultipartEndpoint, err error)
 	// CommitUpload used for merged multipart upload actions, used for multipart cases
 	CommitUpload(path, additionalParameter string) error
+	IterateObjectsKeyOnly(path string, iterator func(path string) error) error
 }
 
 // Copy copies a file from source ObjectStorage to dest ObjectStorage

@@ -267,16 +267,6 @@ func MultipartBatchHandler(ctx *context.Context, br *lfs_module.BatchRequest) {
 		return
 	}
 
-	metas, err := git_model.GetAllLFSMetaObjects(ctx, repository.ID)
-
-	if err != nil {
-		log.Error("Unable to check all the LFS meta data. Error: %v", err)
-		writeStatus(ctx, http.StatusInternalServerError)
-		return
-	}
-
-	pointersExistenceMap, err := contentStore.PointersExists(br.Objects)
-
 	for _, p := range br.Objects {
 		if !p.IsValid() {
 			responseObjects = append(responseObjects, buildMultiPartObjectResponse(rc, p, false, false, &lfs_module.ObjectError{

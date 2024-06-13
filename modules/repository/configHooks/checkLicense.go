@@ -45,20 +45,22 @@ while read oldrev newrev _; do
 	files=$(git diff --name-only $oldrev $newrev)
   if echo "$files" | grep -q "README.md"; then
 		readme_content=$(git show $newrev:README.md)
-		license=$(echo "$readme_content" | grep -ozP -m 1 "license:\s*\K\S+")
-		log_error "--->License:"
-		echo "--->2License: ${license}."
+		license=$(echo "$readme_content" | grep -ozP -m 1 "license:\s*\K\S+" | tr -d '\0')
 		if [[ ${license} = "-" ]]; then
-			license=$(echo "$readme_content" | grep -ozP -m 1 "^license:\s*(\s+-.+\n{1})+")
-			echo "---->1License: ${license}."
-			declare -a arr
-			eval license=$(echo "$license" | awk -F '-' {a[NR]=$2} END {for(i in a) print "arr["i"]="a[i]}')
-			echo "new license: ${#arr[*]}."
+			license=$(echo "$readme_content" | grep -ozP -m 1 "license:\s*\K(\s+-.+\n{1})+"| tr -d '\0')
+			arr=($(echo "$license" | awk -F ' - ' '{a[NR]=$2}END{for(i in a) print a[i]}'))
 			for i in "${!arr[@]}"; do
-				echo "new_license[$i] =  ${arr[$i]}"
+				if [[ ! " ${valid_licenses[@]} " =~ " ${arr[$i]} " ]]; then
+					echo "Sorry, your push was rejected during YAML metadata verification:"
+					echo " - Error: "license" must be one of (${valid_licenses[@]})"
+					log_error "Sorry, your push was rejected during YAML metadata verification:"
+					log_error " - Error: "license" must be one of (${valid_licenses[@]})"
+					log_operation "license check | failed"
+					exit 1
+				fi
 			done
-			log_operation "1license check | failed"
-			exit 1
+			echo "License field is valid. Proceeding with the push."
+			log_operation "license check | success"
 		elif [[ " ${valid_licenses[@]} " =~ " ${license} " ]]; then
 				echo "License field is valid. Proceeding with the push."
 				log_operation "license check | success"

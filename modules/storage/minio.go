@@ -4,7 +4,6 @@
 package storage
 
 import (
-	"code.gitea.io/gitea/modules/structs"
 	"context"
 	"crypto/tls"
 	"fmt"
@@ -18,8 +17,8 @@ import (
 
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/util"
-
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -80,7 +79,8 @@ var getBucketVersioning = func(ctx context.Context, minioClient *minio.Client, b
 // newMinioStorage returns a minio storage
 func newMinioStorage(ctx context.Context, cfg *setting.Storage) (ObjectStorage, error) {
 	if cfg.MinioConfig.BucketDomain != "" {
-		return NewHWCloudStorage(ctx, cfg)
+		return NewCTCloudStorage(ctx, cfg)
+		// return NewHWCloudStorage(ctx, cfg)
 	}
 
 	return NewMinioStorage(ctx, cfg)

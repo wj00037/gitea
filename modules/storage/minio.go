@@ -78,9 +78,11 @@ var getBucketVersioning = func(ctx context.Context, minioClient *minio.Client, b
 
 // newMinioStorage returns a minio storage
 func newMinioStorage(ctx context.Context, cfg *setting.Storage) (ObjectStorage, error) {
-	if cfg.MinioConfig.BucketDomain != "" {
+	if cfg.MinioConfig.BucketDomain == "cdn.openmind-ty.test.osinfra.cn" {
 		return NewCTCloudStorage(ctx, cfg)
-		// return NewHWCloudStorage(ctx, cfg)
+	}
+	if cfg.MinioConfig.BucketDomain != "" {
+		return NewHWCloudStorage(ctx, cfg)
 	}
 
 	return NewMinioStorage(ctx, cfg)

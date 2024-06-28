@@ -18,6 +18,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/minio/minio-go/v7"
+	"github.com/sirupsen/logrus"
 )
 
 var ct_default_expire = 5 * time.Minute
@@ -146,6 +147,7 @@ func (ctc *CTCloudStorage) GenerateMultipartParts(path string, size int64) (part
 		}
 		request, _ := ctc.ctclient.PutObjectRequest(input)
 		output, err := request.Presign(ct_default_expire)
+		logrus.Info("PutObjectRequest.output: ", output)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -212,6 +214,7 @@ func (ctc *CTCloudStorage) CommitUpload(path, additionalParameter string) error 
 		// handle the case if task with identical object has been committed before, return nil and let obs storage check the existence of object.
 		// 如果请求的多段上传任务不存在，AWS返回404 Not Found，包含错误信息NoSuchUpload
 		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == "NoSuchUpload" {
+			logrus.Info("aerr.Message:", aerr.Message())
 			log.Trace("lfs[multipart] unable to complete multipart task %s and %s, unable to find upload task, maybe "+
 				"it completed just now.", ctc.bucket, ctc.buildMinioPath(path))
 			return nil
@@ -234,6 +237,7 @@ func (ctc *CTCloudStorage) URL(path, name string) (*url.URL, error) {
 
 	request, _ := ctc.ctclient.GetObjectRequest(input)
 	output, err := request.Presign(ct_default_expire)
+	logrus.Info("GetObjectRequest.output: ", output)
 	if err != nil {
 		return nil, err
 	}

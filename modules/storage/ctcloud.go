@@ -200,8 +200,10 @@ func (ctc *CTCloudStorage) CommitUpload(path, additionalParameter string) error 
 	for _, p := range param.PartIDs {
 		index := int64(p.Index)
 		part := s3.CompletedPart{ETag: &p.Etag, PartNumber: &index}
+		logrus.Info("part:", part)
 		parts = append(parts, &part)
 	}
+	logrus.Info("parts:", parts)
 	complete := &s3.CompleteMultipartUploadInput{}
 	complete.Bucket = &ctc.bucket
 	key := ctc.buildMinioPath(path)

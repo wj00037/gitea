@@ -4,13 +4,14 @@
 package storage
 
 import (
-	"code.gitea.io/gitea/modules/structs"
 	"context"
 	"errors"
 	"fmt"
 	"io"
 	"net/url"
 	"os"
+
+	"code.gitea.io/gitea/modules/structs"
 
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
@@ -162,7 +163,7 @@ func NewStorage(typStr Type, cfg *setting.Storage) (ObjectStorage, error) {
 	}
 	fn, ok := storageMap[typStr]
 	if !ok {
-		return nil, fmt.Errorf("Unsupported storage type: %s", typStr)
+		return nil, fmt.Errorf("unsupported storage type: %s", typStr)
 	}
 
 	return fn(context.Background(), cfg)

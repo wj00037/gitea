@@ -20,12 +20,15 @@ const (
 	MinioStorageType StorageType = "minio"
 	// HWStorageType is the type descriptor for hw storage
 	HWCloudStorageType StorageType = "hwcloud"
+	// CTStorageType is the type descriptor for ct storage
+	CTCloudStorageType StorageType = "ctcloud"
 )
 
 var storageTypes = []StorageType{
 	LocalStorageType,
 	MinioStorageType,
 	HWCloudStorageType,
+	CTCloudStorageType,
 }
 
 // IsValidStorageType returns true if the given storage type is valid

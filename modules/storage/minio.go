@@ -4,7 +4,6 @@
 package storage
 
 import (
-	"code.gitea.io/gitea/modules/structs"
 	"context"
 	"crypto/tls"
 	"fmt"
@@ -18,8 +17,8 @@ import (
 
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/util"
-
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -27,7 +26,8 @@ import (
 var (
 	_ ObjectStorage = &MinioStorage{}
 
-	quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
+	quoteEscaper               = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
+	CTBucketDomainBucketDomain = "cdn.openmind-ty.test.osinfra.cn"
 )
 
 type minioObject struct {
@@ -79,6 +79,9 @@ var getBucketVersioning = func(ctx context.Context, minioClient *minio.Client, b
 
 // newMinioStorage returns a minio storage
 func newMinioStorage(ctx context.Context, cfg *setting.Storage) (ObjectStorage, error) {
+	if cfg.MinioConfig.BucketDomain == CTBucketDomainBucketDomain {
+		return NewCTCloudStorage(ctx, cfg)
+	}
 	if cfg.MinioConfig.BucketDomain != "" {
 		return NewHWCloudStorage(ctx, cfg)
 	}

@@ -104,13 +104,14 @@ func (ctc *CTCloudStorage) GenerateMultipartParts(path string, size int64) (part
 		log.Trace("lfs[multipart] Starting to create multipart task %s and %s", ctc.bucket, objectKey)
 		upload := s3.CreateMultipartUploadInput{}
 		minioPath := ctc.buildMinioPath(path)
-		upload.Key = &minioPath
-		upload.Bucket = &ctc.bucket
+		upload.Key = aws.String(minioPath)
+		upload.Bucket = aws.String(ctc.bucket)
+		upload.ACL = aws.String("public-read")
 		multipart, err := ctc.ctclient.CreateMultipartUpload(&upload)
-		uploadID = *multipart.UploadId
 		if err != nil {
 			return nil, nil, nil, err
 		}
+		uploadID = *multipart.UploadId
 	}
 	//generate part
 	currentPart := int64(0)
@@ -196,15 +197,15 @@ func (ctc *CTCloudStorage) CommitUpload(path, additionalParameter string) error 
 	//merge multipart
 	parts := make([]*s3.CompletedPart, 0, len(param.PartIDs))
 	for _, p := range param.PartIDs {
-		index := int64(p.Index)
-		part := s3.CompletedPart{ETag: &p.Etag, PartNumber: &index}
-		parts = append(parts, &part)
+		parts = append(parts, &s3.CompletedPart{
+			ETag:       &p.Etag,
+			PartNumber: aws.Int64(int64(p.Index)),
+		})
 	}
 	complete := &s3.CompleteMultipartUploadInput{}
-	complete.Bucket = &ctc.bucket
-	key := ctc.buildMinioPath(path)
-	complete.Key = &key
-	complete.UploadId = &param.UploadID
+	complete.Bucket = aws.String(ctc.bucket)
+	complete.Key = aws.String(ctc.buildMinioPath(path))
+	complete.UploadId = aws.String(param.UploadID)
 	complete.MultipartUpload = &s3.CompletedMultipartUpload{Parts: parts}
 	log.Trace("lfs[multipart] Start to merge multipart task %s and %s", ctc.bucket, ctc.buildMinioPath(path))
 	_, err = ctc.ctclient.CompleteMultipartUpload(complete)

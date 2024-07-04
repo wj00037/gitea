@@ -13,11 +13,13 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
+
+	// "github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/minio/minio-go/v7"
+	"github.com/sirupsen/logrus"
 )
 
 var ct_default_expire = 15 * time.Minute
@@ -147,6 +149,7 @@ func (ctc *CTCloudStorage) GenerateMultipartParts(path string, size int64) (part
 		}
 		request, _ := ctc.ctclient.PutObjectRequest(input)
 		output, err := request.Presign(ct_default_expire)
+		logrus.Info("output: ", output)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -194,31 +197,31 @@ func (ctc *CTCloudStorage) CommitUpload(path, additionalParameter string) error 
 		return errors.New("parameter is empty")
 	}
 	log.Trace("lfs[multipart] start to commit upload object %v", param)
-	//merge multipart
-	parts := make([]*s3.CompletedPart, 0, len(param.PartIDs))
-	for _, p := range param.PartIDs {
-		parts = append(parts, &s3.CompletedPart{
-			ETag:       &p.Etag,
-			PartNumber: aws.Int64(int64(p.Index)),
-		})
-	}
-	complete := &s3.CompleteMultipartUploadInput{}
-	complete.Bucket = aws.String(ctc.bucket)
-	complete.Key = aws.String(ctc.buildMinioPath(path))
-	complete.UploadId = aws.String(param.UploadID)
-	complete.MultipartUpload = &s3.CompletedMultipartUpload{Parts: parts}
-	log.Trace("lfs[multipart] Start to merge multipart task %s and %s", ctc.bucket, ctc.buildMinioPath(path))
-	_, err = ctc.ctclient.CompleteMultipartUpload(complete)
-	if err != nil {
-		// handle the case if task with identical object has been committed before, return nil and let obs storage check the existence of object.
-		// 如果请求的多段上传任务不存在，AWS返回404 Not Found，包含错误信息NoSuchUpload
-		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == "NoSuchUpload" {
-			log.Trace("lfs[multipart] unable to complete multipart task %s and %s, unable to find upload task, maybe "+
-				"it completed just now.", ctc.bucket, ctc.buildMinioPath(path))
-			return nil
-		}
-		return err
-	}
+	// //merge multipart
+	// parts := make([]*s3.CompletedPart, 0, len(param.PartIDs))
+	// for _, p := range param.PartIDs {
+	// 	parts = append(parts, &s3.CompletedPart{
+	// 		ETag:       &p.Etag,
+	// 		PartNumber: aws.Int64(int64(p.Index)),
+	// 	})
+	// }
+	// complete := &s3.CompleteMultipartUploadInput{}
+	// complete.Bucket = aws.String(ctc.bucket)
+	// complete.Key = aws.String(ctc.buildMinioPath(path))
+	// complete.UploadId = aws.String(param.UploadID)
+	// complete.MultipartUpload = &s3.CompletedMultipartUpload{Parts: parts}
+	// log.Trace("lfs[multipart] Start to merge multipart task %s and %s", ctc.bucket, ctc.buildMinioPath(path))
+	// _, err = ctc.ctclient.CompleteMultipartUpload(complete)
+	// if err != nil {
+	// 	// handle the case if task with identical object has been committed before, return nil and let obs storage check the existence of object.
+	// 	// 如果请求的多段上传任务不存在，AWS返回404 Not Found，包含错误信息NoSuchUpload
+	// 	if aerr, ok := err.(awserr.Error); ok && aerr.Code() == "NoSuchUpload" {
+	// 		log.Trace("lfs[multipart] unable to complete multipart task %s and %s, unable to find upload task, maybe "+
+	// 			"it completed just now.", ctc.bucket, ctc.buildMinioPath(path))
+	// 		return nil
+	// 	}
+	// 	return err
+	// }
 	//TODO notify CDN to fetch new object
 	return nil
 

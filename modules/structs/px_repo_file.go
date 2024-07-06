@@ -9,6 +9,7 @@ type CommitContentsResponse struct {
 	HTMLURL     *string `json:"html_url"`
 	DownloadURL *string `json:"download_url"`
 	IsNonText   *bool   `json:"is_non_text"`
+	FileType    *string `json:"file_type"`
 
 	Name              string    `json:"name"`
 	Path              string    `json:"path"`

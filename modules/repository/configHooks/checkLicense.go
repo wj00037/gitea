@@ -61,6 +61,23 @@ while read oldrev newrev _; do
 			done
 			echo "License field is valid. Proceeding with the push."
 			log_operation "license check | success"
+		elif [[ "$license" =~ ^\[ ]]; then
+			license=$(echo "$readme_content" | grep -ozP -m 1 "license:\s*\K\[.*?\]")
+			license=$(echo "$license" | tr -d '[]')
+			license=$(echo "$license" | tr -d ',')
+			arr=($license)
+            for item in "${arr[@]}"; do
+				if [[ ! " ${valid_licenses[@]} " =~ " $item " ]]; then
+			        echo "Sorry, your push was rejected during YAML metadata verification:"
+                    echo " - Error: "license" must be one of (${valid_licenses[@]})"
+                    log_error "Sorry, your push was rejected during YAML metadata verification:"
+                    log_error " - Error: "license" must be one of (${valid_licenses[@]})"
+                    log_operation "license check | failed"
+                    exit 1
+			    fi
+			done
+			echo "License field is valid. Proceeding with the push."
+			log_operation "license check | success"
 		elif [[ " ${valid_licenses[@]} " =~ " ${license} " ]]; then
 				echo "License field is valid. Proceeding with the push."
 				log_operation "license check | success"

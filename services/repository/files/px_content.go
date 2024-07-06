@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/url"
 	"path"
+	"path/filepath"
+	"slices"
 	"strings"
 
 	"code.gitea.io/gitea/models"
@@ -17,6 +19,15 @@ import (
 )
 
 type checkOption func(*api.CommitContentsResponse, *git.TreeEntry) error
+
+var audioExt = []string{".wav", ".mp3", ".aac", ".m4a", ".amr", ".3gp", "wma", ".ogg", ".ape",
+	".flac", ".wv", ".wvp", ".silk", ".opus", ".mpc", "mp+", ".ac3", ".dts"}
+var videoExt = []string{".avi", ".flv", ".mp4", ".mpg", ".mpeg", ".wmv", ".mov", ".wma", ".rmvb",
+	".m3u8"}
+var imageExt = []string{".jpg", ".jpeg", ".png", ".webp", ".gif", ".tif", ".tiff", ".heif",
+	".heic", ".ico", ".tga"}
+var DocumentExt = []string{".docx", ".pdf", ".doc", ".xls", ".xlsx", ".ppt", ".pptx", ".pps",
+	".ppsx", ".xltx", ".xlsb", ".xltm", ".xlsm", ".txt", ".csv", ".epub", ".htm", ".html"}
 
 // GetCommitContentsOrList gets the meta data of a file's contents (*ContentsResponse) if treePath not a tree
 // directory, otherwise a listing of file contents ([]*ContentsResponse). Ref can be a branch, commit or tag
@@ -56,7 +67,7 @@ func GetCommitContentsOrList(ctx context.Context, repo *repo_model.Repository, t
 	}
 
 	if entry.Type() != "tree" {
-		return GetCommitContents(ctx, repo, treePath, origRef, false, checkIsNonText)
+		return GetCommitContents(ctx, repo, treePath, origRef, false, checkIsNonText, checkFileType)
 	}
 
 	// We are in a directory, so we return a list of FileContentResponse objects
@@ -248,6 +259,22 @@ func checkIsNonText(response *api.CommitContentsResponse, entry *git.TreeEntry) 
 	return nil
 }
 
+func checkFileType(response *api.CommitContentsResponse, entry *git.TreeEntry) (err error) {
+	var fileType string
+	if _, b := isLFS(entry); b {
+		fileType, err = GetLfsFileType(entry, response.Name)
+	} else {
+		fileType, err = GetFileType(entry)
+	}
+
+	if err != nil {
+		return err
+	}
+	response.FileType = &fileType
+
+	return nil
+}
+
 func isLFS(entry *git.TreeEntry) (lfs.Pointer, bool) {
 	if !entry.IsRegular() || entry.Size() > 512 {
 		return lfs.Pointer{}, false
@@ -283,4 +310,53 @@ func isNonText(entry *git.TreeEntry) (bool, error) {
 	st := typesniffer.DetectContentType(buf)
 
 	return !st.IsText(), nil
+}
+
+func GetLfsFileType(entry *git.TreeEntry, FileName string) (string, error) {
+	if !entry.IsRegular() {
+		return "", nil
+	}
+	extName := filepath.Ext(FileName)
+	if slices.Index(DocumentExt, extName) != -1 {
+		return "document", nil
+	} else if slices.Index(imageExt, extName) != -1 {
+		return "image", nil
+	} else if slices.Index(videoExt, extName) != -1 {
+		return "video", nil
+	} else if slices.Index(audioExt, extName) != -1 {
+		return "audio", nil
+	} else {
+		return "unknown", nil
+	}
+}
+
+func GetFileType(entry *git.TreeEntry) (string, error) {
+	if !entry.IsRegular() {
+		return "", nil
+	}
+
+	dataRc, err := entry.Blob().DataAsync()
+	if err != nil {
+		return "", err
+	}
+
+	defer dataRc.Close()
+
+	buf := make([]byte, 1024)
+	n, _ := util.ReadAtMost(dataRc, buf)
+	buf = buf[:n]
+
+	st := typesniffer.DetectContentType(buf)
+
+	if st.IsVideo() {
+		return "video", nil
+	} else if st.IsAudio() {
+		return "audio", nil
+	} else if st.IsImage() {
+		return "image", nil
+	} else if st.IsDocument() {
+		return "document", nil
+	} else {
+		return "unknown", nil
+	}
 }

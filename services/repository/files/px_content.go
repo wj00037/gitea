@@ -83,7 +83,7 @@ func GetCommitContentsOrList(ctx context.Context, repo *repo_model.Repository, t
 	}
 	for _, e := range entries {
 		subTreePath := path.Join(treePath, e.Name())
-		fileContentResponse, err := GetCommitContents(ctx, repo, subTreePath, origRef, true)
+		fileContentResponse, err := GetCommitContents(ctx, repo, subTreePath, origRef, true, checkFileType)
 		if err != nil {
 			return nil, err
 		}

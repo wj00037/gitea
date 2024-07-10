@@ -580,9 +580,9 @@ func SDKhandleCheckErrors(file *ChangeRepoFile, commit *git.Commit, opts *Change
 					Type:    git.EntryModeTree,
 				}
 			} else if file.Options.fromTreePath != file.Options.treePath || file.Operation == "create" {
-				//Manually change the user-specified "create" to "update" and continue the upload to
-				//overwrite the original file. If the content of the file remains unchanged between submissions,
-				//no error will be reported, and no new commit record will be added.
+				// Manually change the user-specified "create" to "update" and continue the upload to
+				// overwrite the original file. If the content of the file remains unchanged between submissions,
+				// no error will be reported, and no new commit record will be added.
 				file.Operation = "update"
 				return nil
 			}
@@ -726,7 +726,7 @@ func createOrUpdateFileWithGitAtt(t *TemporaryUploadRepository, t2 *TemporaryUpl
 
 		teeReader := io.TeeReader(treeObjectContentReader, &buf)
 
-		//check if a file is a pointer
+		// check if a file is a pointer
 		pointer, err := lfs.ReadPointer(teeReader)
 
 		// If the file is not identified by .gitattribute as lfs file, update .gitattribute file

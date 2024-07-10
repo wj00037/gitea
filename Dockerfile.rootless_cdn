@@ -22,7 +22,10 @@ RUN wget -O /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/
 RUN chmod +x /usr/local/bin/dumb-init
 
 RUN go env -w GOPROXY=https://goproxy.cn,direct
-
+ARG GH_USER
+ARG GH_TOKEN
+RUN go env -w GOPRIVATE=github.com/openmerlin
+RUN echo "machine github.com login ${GH_USER} password ${GH_TOKEN}" > $HOME/.netrc
 ARG GITEA_VERSION
 ARG TAGS="sqlite sqlite_unlock_notify"
 ENV TAGS "bindata timetzdata $TAGS"

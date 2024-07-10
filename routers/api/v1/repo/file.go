@@ -495,7 +495,9 @@ func ChangeFilesAndGitAttribute(ctx *context.APIContext) {
 	}
 
 	var files []*files_service.ChangeRepoFile
+	var FilesList []string
 	for _, file := range apiOpts.Files {
+		FilesList = append(FilesList, file.Path)
 		contentReader, err := base64Reader(file.ContentBase64)
 		if err != nil {
 			ctx.Error(http.StatusUnprocessableEntity, "Invalid base64 content", err)
@@ -517,6 +519,11 @@ func ChangeFilesAndGitAttribute(ctx *context.APIContext) {
 			SHA:           file.SHA,
 		}
 		files = append(files, changeRepoFile)
+	}
+
+	if err := merlin.CheckText(FilesList, apiOpts.Message); err != nil {
+		ctx.Error(http.StatusUnprocessableEntity, err.Error(), err)
+		return
 	}
 
 	opts := &files_service.ChangeRepoFilesOptions{
@@ -549,7 +556,7 @@ func ChangeFilesAndGitAttribute(ctx *context.APIContext) {
 		opts.Message = changeFilesCommitMessage(ctx, files)
 	}
 
-	//to update .gitattribute file if uploading file using python SDK
+	// to update .gitattribute file if uploading file using python SDK
 	if filesResponse, err := createOrUpdateFilesWithGitAtt(ctx, opts); err != nil {
 		handleCreateOrUpdateFileError(ctx, err)
 	} else {
@@ -600,8 +607,10 @@ func ChangeFiles(ctx *context.APIContext) {
 		apiOpts.BranchName = ctx.Repo.Repository.DefaultBranch
 	}
 
+	var FilesList []string
 	var files []*files_service.ChangeRepoFile
 	for _, file := range apiOpts.Files {
+		FilesList = append(FilesList, file.Path)
 		contentReader, err := base64Reader(file.ContentBase64)
 		if err != nil {
 			ctx.Error(http.StatusUnprocessableEntity, "Invalid base64 content", err)
@@ -623,6 +632,11 @@ func ChangeFiles(ctx *context.APIContext) {
 			SHA:           file.SHA,
 		}
 		files = append(files, changeRepoFile)
+	}
+
+	if err := merlin.CheckText(FilesList, apiOpts.Message); err != nil {
+		ctx.Error(http.StatusUnprocessableEntity, err.Error(), err)
+		return
 	}
 
 	opts := &files_service.ChangeRepoFilesOptions{

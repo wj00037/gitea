@@ -889,6 +889,8 @@ github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/opencontainers/image-spec v1.1.0-rc5 h1:Ygwkfw9bpDvs+c9E34SdgGOj41dX/cbdlwvlWt0pnFI=
 github.com/opencontainers/image-spec v1.1.0-rc5/go.mod h1:X4pATf0uXsnn3g5aiGIsVnJBR4mxhKzfwmvK/B2NTm8=
+github.com/openmerlin/moderation-service-sdk v0.0.0-20240702072316-513566c4b644 h1:lFWv3HSKhrf3iQlOz+Yv5ate0x3MRfKhRMCYC8jXoq8=
+github.com/openmerlin/moderation-service-sdk v0.0.0-20240702072316-513566c4b644/go.mod h1:tMfsGibYhfzyXdOtCft0O/6vVxnvdSsaGTNtInlzBYc=
 github.com/opensourceways/kafka-lib v0.0.0-20231114071554-b2af9944cf3a h1:5xXuRZvvHGqn9qsPJLZfR0hnKYJxBfjrA6jMApZJJDY=
 github.com/opensourceways/kafka-lib v0.0.0-20231114071554-b2af9944cf3a/go.mod h1:SEGf1d1Eui0F39CQlH/zR7ccxuBiE0NIneW8N1tyC0k=
 github.com/opensourceways/server-common-lib v0.0.0-20231027024402-f55c66e6699c h1:atmkPztYx7LFXhwnjrQ6IvgZXmzqFREYzpYA4qfsG9I=

@@ -86,6 +86,7 @@ require (
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.0-rc5
+	github.com/openmerlin/moderation-service-sdk v0.0.0-20240702072316-513566c4b644
 	github.com/opensourceways/kafka-lib v0.0.0-20231114071554-b2af9944cf3a
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.4.0

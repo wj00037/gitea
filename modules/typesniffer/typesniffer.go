@@ -31,11 +31,11 @@ var (
 )
 
 var audioFormats = map[string][][]byte{
-	"audio/aac":        {[]byte("ADIF"), []byte("ADTS")},
-	"audio/amr":        {[]byte("#!AMR\r\n")},
-	"audio/3pg":        {[]byte("ftyp3gp")},
-	"audio/m4a":        {[]byte("ftypmp41"), []byte("ftypmp42")},
-	"audio/x-ms-wma":   {[]byte("ftypWMAV")},
+	"audio/x-aac":      {{0xFF, 0xF1}, {0xFF, 0xF9}},
+	"audio/amr":        {[]byte("#!AMR")},
+	"audio/3gp":        {[]byte("ftyp3gp")},
+	"audio/m4a":        {[]byte("ftypM4A")},
+	"audio/x-ms-wma":   {{0x30, 0x26, 0xB2}},
 	"audio/x-ape":      {[]byte("APE"), []byte("MAC")},
 	"audio/x-flac":     {[]byte("fLaC")},
 	"audio/alac":       {[]byte("alac")},
@@ -48,42 +48,42 @@ var audioFormats = map[string][][]byte{
 }
 
 var videoFormats = map[string][][]byte{
-	"video/x-msvideo":       {[]byte("RIFFAVI ")},
-	"video/x-flv":           {[]byte("FLV")},
-	"video/mp4":             {[]byte("ftypmp41"), []byte("ftypmp42")},
-	"video/mpeg":            {{0x00, 0x00, 0x01, 0xBA}, {0x00, 0x00, 0x01, 0xB3}},
-	"video/x-ms-wmv":        {[]byte("WMV1"), []byte("WMV2")},
+	"video/x-msvideo": {[]byte("RIFFAVI "), {0x41, 0x56, 0x49, 0x20}},
+	"video/x-flv":     {[]byte("FLV")},
+	"video/mp4":       {[]byte("ftypmp4"), []byte("ftypM4V"), []byte("ftypisom")},
+	"video/mpeg":      {{0x00, 0x00, 0x01, 0xBA}, {0x00, 0x00, 0x01, 0xB3}},
+	"video/x-ms-wmv": {
+		[]byte("WMV1"), []byte("WMV2"),
+		{0x30, 0x26, 0xB2, 0x75, 0x8E, 0x66, 0xCF, 0x11, 0xA6, 0xD9, 0x00, 0xAA, 0x00, 0x62, 0xCE, 0x6C}},
 	"video/quicktime":       {{0x6D, 0x6F, 0x6F, 0x76}},
 	"video/rmvb":            {[]byte(".RMF")},
 	"application/x-mpegURL": {[]byte("#EXTM3U\n#EXT-X")},
 }
 
 var imageFormats = map[string][][]byte{
-	"image/tiff":   {{0x49, 0x49, 0x2A, 0x00}, {0x4D, 0x4D, 0x00, 0x2A}},
+	"image/tiff":   {{0x49, 0x49, 0x2A}, {0x4D, 0x4D, 0x00, 0x2A}, {0x4D, 0x4D, 0x00, 0x2B}, {0x49, 0x20, 0x49}},
 	"image/heif":   {[]byte("ftypheic"), []byte("ftypmif1")},
 	"image/x-icon": {{0x00, 0x00, 0x01, 0x00}},
-	"image/x-tga":  {{0x00, 0x00, 0x02, 0x00}},
+	"image/x-tga":  {{0x00, 0x00, 0x02}, {0x00, 0x00, 0x10, 0x00, 0x00}},
 }
 
 var documentFormats = map[string][][]byte{
-	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": {{0x50, 0x4B, 0x04, 0x04}},
-	"application/msword":            {{0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1}},
-	"application/vnd.ms-excel":      {{0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1}},
-	"application/vnd.ms-powerpoint": {{0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1}},
-	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {{0x50, 0x4B, 0x03,
-		0x04, 0x14, 0x00, 0x06, 0x00}},
-	"application/vnd.openxmlformats-officedocument.presentationml.presentation": {{0x50, 0x4B, 0x03,
-		0x04, 0x14, 0x00, 0x06, 0x00}},
-	"application/vnd.openxmlformats-officedocument.presentationml.slideshow": {{0x50, 0x4B, 0x03,
-		0x04, 0x14, 0x00, 0x06, 0x00}},
-	"application/vnd.openxmlformats-officedocument.spreadsheetml.template": {{0x50, 0x4B, 0x03,
-		0x04, 0x14, 0x00, 0x06, 0x00}},
-	"application/vnd.ms-excel.template.macroEnabled.12": {{0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1}},
-	"application/vnd.ms-excel.sheet.binary.macroEnabled.12": {{0x09, 0x08, 0x10, 0x00,
-		0x00, 0x06, 0x05, 0x00}},
-	"application/vnd.ms-excel.sheet.macroEnabled.12": {{0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1,
-		0x1A, 0xE1}},
-	"application/epub+zip": {[]byte("PK\x03\x04")},
+	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": {{0x50, 0x4B, 0x03, 0x04}},
+	"application/msword": {
+		{0x0D, 0x44, 0x4F, 0x43}, {0xDB, 0xA5, 0x2D, 0x00},
+		{0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1},
+		{0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1},
+	},
+	"application/vnd.ms-excel":                                                  {{0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1}},
+	"application/vnd.ms-powerpoint":                                             {{0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1}},
+	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":         {{0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00}},
+	"application/vnd.openxmlformats-officedocument.presentationml.presentation": {{0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00}},
+	"application/vnd.openxmlformats-officedocument.presentationml.slideshow":    {{0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00}},
+	"application/vnd.openxmlformats-officedocument.spreadsheetml.template":      {{0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00}},
+	"application/vnd.ms-excel.template.macroEnabled.12":                         {{0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1}},
+	"application/vnd.ms-excel.sheet.binary.macroEnabled.12":                     {{0x09, 0x08, 0x10, 0x00, 0x00, 0x06, 0x05, 0x00}},
+	"application/vnd.ms-excel.sheet.macroEnabled.12":                            {{0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1}},
+	"application/epub+zip":                                                      {[]byte("PK\x03\x04")},
 }
 
 // SniffedType contains information about a blobs type.
@@ -204,22 +204,43 @@ func DetectContentType(data []byte) SniffedType {
 			for _, prefix := range headFormats {
 				if bytes.HasPrefix(dataHead, prefix) {
 					ct = ctName
+					break
 				}
 			}
 		}
 
 		for ctName, headFormats := range audioFormats {
+			if ctName == "audio/m4a" || ctName == "audio/3gp" {
+				newDataHead := dataHead[4:]
+				for _, prefix := range headFormats {
+					if bytes.HasPrefix(newDataHead, prefix) {
+						ct = ctName
+						break
+					}
+				}
+			}
 			for _, prefix := range headFormats {
 				if bytes.HasPrefix(dataHead, prefix) {
 					ct = ctName
+					break
 				}
 			}
 		}
 
 		for ctName, headFormats := range videoFormats {
+			if ctName == "video/mp4" {
+				newDataHead := dataHead[4:]
+				for _, prefix := range headFormats {
+					if bytes.HasPrefix(newDataHead, prefix) {
+						ct = ctName
+						break
+					}
+				}
+			}
 			for _, prefix := range headFormats {
 				if bytes.HasPrefix(dataHead, prefix) {
 					ct = ctName
+					break
 				}
 			}
 		}

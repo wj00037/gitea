@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
+	"code.gitea.io/gitea/merlin"
 	"code.gitea.io/gitea/models"
 	asymkey_model "code.gitea.io/gitea/models/asymkey"
 	git_model "code.gitea.io/gitea/models/git"
@@ -130,9 +132,36 @@ func HookPreReceive(ctx *gitea_context.PrivateContext) {
 		if ctx.Written() {
 			return
 		}
+		//  Text content review
+		preReceiveContentReview(ourCtx, oldCommitID, newCommitID, refFullName)
 	}
 
 	ctx.PlainText(http.StatusOK, "ok")
+}
+
+func preReceiveContentReview(ctx *preReceiveContext, oldCommitID, newCommitID string, refFullName git.RefName) {
+	if git.EmptySHA != oldCommitID {
+		repo := ctx.Repo.Repository
+		fileName, _, err := git.NewCommand(ctx, "diff", "--name-only").AddDynamicArguments(oldCommitID, newCommitID).RunStdString(&git.RunOpts{Dir: repo.RepoPath(), Env: ctx.env})
+		processedFileName := strings.Split(fileName, "\n")
+		commitMessage, _, err := git.NewCommand(ctx, "log", "--pretty=format:%s").AddDynamicArguments(oldCommitID, ".."+newCommitID).RunStdString(&git.RunOpts{Dir: repo.RepoPath(), Env: ctx.env})
+		if err != nil {
+			log.Error("file context failed, %v", err)
+			ctx.JSON(http.StatusInternalServerError, private.Response{
+				Err: err.Error(),
+			})
+			return
+		}
+
+		if err := merlin.CheckText(processedFileName, commitMessage); err != nil {
+			log.Error("moderation text failed, %v", err)
+			ctx.JSON(http.StatusInternalServerError, private.Response{
+				UserMsg: fmt.Sprintf("Forbidden: %v", err),
+			})
+			return
+		}
+	}
+	return
 }
 
 func preReceiveBranch(ctx *preReceiveContext, oldCommitID, newCommitID string, refFullName git.RefName) {

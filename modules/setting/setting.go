@@ -167,6 +167,20 @@ func BlankCfg() {
 	} else {
 		log.Info("successfully blanking server.LFS_JWT_SECRET to config")
 	}
+
+	saveCfg.Section("moderation_service").Key("TOKEN").SetValue("")
+	if err := saveCfg.Save(); err != nil {
+		log.Error("Unable to blanking moderation_service.TOKEN to config %q: %v\nYou should set it manually, otherwise there might be bugs when accessing the git repositories.", CustomConf, err)
+	} else {
+		log.Info("successfully blanking moderation_service.TOKEN to config")
+	}
+
+	saveCfg.Section("moderation_service").Key("ENDPOINT").SetValue("")
+	if err := saveCfg.Save(); err != nil {
+		log.Error("Unable to blanking moderation_service.ENDPOINT to config %q: %v\nYou should set it manually, otherwise there might be bugs when accessing the git repositories.", CustomConf, err)
+	} else {
+		log.Info("successfully blanking moderation_service.ENDPOINT to config")
+	}
 }
 
 func InitCfgProvider(file string, extraConfigs ...string) {
@@ -237,6 +251,7 @@ func loadCommonSettingsFrom(cfg ConfigProvider) error {
 	loadMirrorFrom(cfg)
 	loadMarkupFrom(cfg)
 	loadOtherFrom(cfg)
+	loadModerationFrom(cfg)
 	return nil
 }
 

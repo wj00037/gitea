@@ -1,0 +1,23 @@
+name: e2e-tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+env:
+  GOPRIVATE: "github.com/openmerlin"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: [self-hosted, Linux]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the Docker image
+        env:
+          GH_TOKEN: ${{ secrets.PKKING_PERSONAL_TOKEN }}
+          GH_USER: ${{ secrets.USER_NAME }}
+        run: docker build --build-arg GH_TOKEN=${GH_TOKEN} --build-arg GH_USER=${GH_USER} -t gitea -f Dockerfile.rootless_cdn .

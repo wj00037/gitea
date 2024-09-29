@@ -21,9 +21,9 @@ import (
 	"code.gitea.io/gitea/modules/process"
 	"code.gitea.io/gitea/modules/public"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/opentelemetry"
 	"code.gitea.io/gitea/routers"
 	"code.gitea.io/gitea/routers/install"
-	"code.gitea.io/gitea/opentelemetry"
 
 	"github.com/felixge/fgprof"
 	"github.com/urfave/cli/v2"
@@ -246,7 +246,7 @@ func runWeb(ctx *cli.Context) error {
 	if setting.EnablePprof {
 		go servePprof()
 	}
-	shutdown := opentelemetry.InitTrace(&setting.OtelTraceConfig) 
+	shutdown := opentelemetry.InitTrace(&setting.OtelTraceConfig)
 	defer shutdown()
 
 	return serveInstalled(ctx)

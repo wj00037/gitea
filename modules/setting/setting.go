@@ -98,6 +98,13 @@ func BlankCfg() {
 	rootCfg := CfgProvider
 	saveCfg, _ := rootCfg.PrepareSaving()
 
+	saveCfg.Section("server").Key("LFS_JWT_SECRET").SetValue("")
+	if err := saveCfg.Save(); err != nil {
+		log.Error("Unable to blanking server.LFS_JWT_SECRET to config %q: %v\nYou should set it manually, otherwise there might be bugs when accessing the git repositories.", CustomConf, err)
+	} else {
+		log.Info("successfully blanking server.LFS_JWT_SECRET to config")
+	}
+
 	saveCfg.Section("storage.minio").Key("MINIO_ACCESS_KEY_ID").SetValue("")
 	if err := saveCfg.Save(); err != nil {
 		log.Error("Unable to blanking storage.minio.MINIO_ACCESS_KEY_ID to config %q: %v\nYou should set it manually, otherwise there might be bugs when accessing the git repositories.", CustomConf, err)
@@ -161,13 +168,6 @@ func BlankCfg() {
 		log.Info("successfully blanking oauth2.JWT_SECRET to config")
 	}
 
-	saveCfg.Section("server").Key("LFS_JWT_SECRET").SetValue("")
-	if err := saveCfg.Save(); err != nil {
-		log.Error("Unable to blanking server.LFS_JWT_SECRET to config %q: %v\nYou should set it manually, otherwise there might be bugs when accessing the git repositories.", CustomConf, err)
-	} else {
-		log.Info("successfully blanking server.LFS_JWT_SECRET to config")
-	}
-
 	saveCfg.Section("moderation_service").Key("TOKEN").SetValue("")
 	if err := saveCfg.Save(); err != nil {
 		log.Error("Unable to blanking moderation_service.TOKEN to config %q: %v\nYou should set it manually, otherwise there might be bugs when accessing the git repositories.", CustomConf, err)
@@ -180,6 +180,13 @@ func BlankCfg() {
 		log.Error("Unable to blanking moderation_service.ENDPOINT to config %q: %v\nYou should set it manually, otherwise there might be bugs when accessing the git repositories.", CustomConf, err)
 	} else {
 		log.Info("successfully blanking moderation_service.ENDPOINT to config")
+	}
+
+	saveCfg.Section("moderation_server").Key("TOKEN_SERVER").SetValue("")
+	if err := saveCfg.Save(); err != nil {
+		log.Error("Unable to blanking moderation_server.TOKEN_SERVER to config %q: %v\nYou should set it manually, otherwise there might be bugs when accessing the git repositories.", CustomConf, err)
+	} else {
+		log.Info("successfully blanking moderation_server.TOKEN_SERVER to config")
 	}
 }
 

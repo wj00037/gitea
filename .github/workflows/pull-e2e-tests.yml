@@ -5,7 +5,7 @@ on:
   pull_request:
 
 env:
-  GOPRIVATE: "github.com/openmerlin"
+  GOPRIVATE: "gitee.com/modelers"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}

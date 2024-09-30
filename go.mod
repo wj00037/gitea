@@ -13,6 +13,7 @@ require (
 	gitea.com/go-chi/session v0.0.0-20230613035928-39541325faa3
 	gitea.com/lunny/dingtalk_webhook v0.0.0-20171025031554-e3534c89ef96
 	gitea.com/lunny/levelqueue v0.4.2-0.20230414023320-3c0159fe0fe4
+	gitee.com/modelers/moderation-server-sdk v0.0.0-20240924024548-f9ea8dae5f5f
 	github.com/42wim/sshsig v0.0.0-20211121163825-841cf5bbc121
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358
 	github.com/NYTimes/gziphandler v1.1.1
@@ -86,8 +87,6 @@ require (
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.0-rc5
-	github.com/openmerlin/moderation-server-sdk v0.0.0-20240727034255-0fadc9fe494a
-	github.com/openmerlin/moderation-service-sdk v0.0.0-20240710090700-bc6555d61def
 	github.com/opensourceways/kafka-lib v0.0.0-20240525094632-94d264f0114c
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.4.0

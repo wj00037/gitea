@@ -1,7 +1,7 @@
 package setting
 
 import (
-	"github.com/openmerlin/moderation-server-sdk/httpclient"
+	"gitee.com/modelers/moderation-server-sdk/httpclient"
 )
 
 var MaxTextLen int

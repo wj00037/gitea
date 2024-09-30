@@ -6,8 +6,8 @@ import (
 	"unicode/utf8"
 
 	moderationsdk "code.gitea.io/gitea/modules/setting"
-	"github.com/openmerlin/moderation-server-sdk/moderation"
-	moderationapi "github.com/openmerlin/moderation-server-sdk/moderation/api"
+	"gitee.com/modelers/moderation-server-sdk/moderation"
+	moderationapi "gitee.com/modelers/moderation-server-sdk/moderation/api"
 )
 
 const templateText = "一一一一一一一一一一"

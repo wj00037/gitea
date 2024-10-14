@@ -1,0 +1,61 @@
+version: '1.0'
+name: ci
+displayName: ci
+triggers:
+  trigger: auto
+  pr:
+    branches:
+      prefix:
+        - ''
+variables:
+  global:
+    - GH_TOKEN
+    - GH_USER
+    - PROJECT
+    - GT_TOKEN
+    - GT_USER
+stages:
+  - name: ci
+    displayName: ci
+    strategy: naturally
+    trigger: auto
+    executor: []
+    steps:
+      - step: shell@agent
+        name: ci
+        displayName: ci
+        hostGroupID:
+          ID: CI-builder--hk
+          hostID:
+            - 84c98a45-3b9b-4866-b1b2-b931e344c2ad
+        script:
+          - mkdir ${PROJECT}
+          - ''
+          - cd ${PROJECT}
+          - ''
+          - '# 超时、错误重试'
+          - retry_count=0
+          - ''
+          - while true; do
+          - '    # 设置超时时间为1分钟'
+          - '    if timeout 1m git clone -b ${GITEE_SOURCE_BRANCH} https://gitee.com/${GITEE_REPO}.git; then'
+          - '        echo "clone success"'
+          - '        break '
+          - '    else'
+          - '        retry_count=$((retry_count + 1))'
+          - '        echo "clone failed, rerty:"$retry_count'
+          - '        if [ $retry_count -eq 10 ]; then'
+          - '            echo "clone failed, exit"'
+          - '            exit 1 '
+          - '        fi'
+          - '    fi'
+          - done
+          - ''
+          - cd ../${GITEE_REPO}
+          - ''
+          - bash giteeci/ci.sh
+        notify: []
+        strategy:
+          retry: '0'
+strategy:
+  blocking: true

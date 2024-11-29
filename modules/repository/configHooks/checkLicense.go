@@ -62,6 +62,7 @@ while read oldrev newrev _; do
 						continue
 		fi
 		readme_content=$(git show $newrev:README.md)
+		readme_content=$(echo "$readme_content" | grep -ozP -m 1 "---\s*([\s\S]*?)\s*---" | tr -d '\0')
 		if [ ! -z "$readme_content" ]; then
 			license=$(echo "$readme_content" | grep -ozP -m 1 "license:\s*\K\S+" | tr -d '\0')
 			if [[ ${license} = "-" ]]; then

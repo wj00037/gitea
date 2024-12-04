@@ -31,6 +31,7 @@ type ConfigKey interface {
 	MustBool(defaultVal ...bool) bool
 	MustInt(defaultVal ...int) int
 	MustInt64(defaultVal ...int64) int64
+	MustFloat64(defaultVal ...float64) float64
 	MustDuration(defaultVal ...time.Duration) time.Duration
 }
 

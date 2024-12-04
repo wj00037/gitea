@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/utils/sqltrace"
 
 	"xorm.io/xorm"
 	"xorm.io/xorm/names"
@@ -107,6 +108,12 @@ func newXORMEngine() (*xorm.Engine, error) {
 		engine, err = xorm.NewEngine("postgresschema", connStr)
 	} else {
 		engine, err = xorm.NewEngine(setting.Database.Type.String(), connStr)
+	}
+	// when enable otel trace, add otel hook
+	if setting.Otel.Enabled {
+		engine.AddHook(sqltrace.Hook(
+			sqltrace.SetDBName(setting.Database.Name),
+		))
 	}
 
 	if err != nil {

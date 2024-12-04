@@ -173,7 +173,7 @@ func InitWebInstalled(ctx context.Context) {
 func NormalRoutes() *web.Route {
 	_ = templates.HTMLRenderer()
 	r := web.NewRoute()
-	if setting.OtelTraceConfig.Enabled {
+	if setting.Otel.Enabled {
 		r.Use(common.ResponseTraceMiddlewares()...)
 	}
 	r.Use(common.ProtocolMiddlewares()...)

@@ -15,17 +15,14 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	domain "code.gitea.io/gitea/config/trace"
+	"code.gitea.io/gitea/modules/setting"
 	"github.com/sirupsen/logrus"
 )
 
 // Initialize a gRPC connection to be used by both the tracer and meter
 // providers.
-func initConn(config *domain.Config) (*grpc.ClientConn, error) {
-	// It connects the OpenTelemetry Collector through local gRPC connection.
-	// You may replace `localhost:4317` with your endpoint.
+func initConn(config *setting.OtelConfig) (*grpc.ClientConn, error) {
 	conn, err := grpc.NewClient(config.Endpoint,
-		// Note the use of insecure transport here. TLS is recommended in production.
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -37,24 +34,22 @@ func initConn(config *domain.Config) (*grpc.ClientConn, error) {
 
 // Initializes an OTLP exporter, and configures the corresponding trace provider.
 func initTracerProvider(
-	ctx context.Context, res *resource.Resource, conn *grpc.ClientConn) (func(context.Context) error, error) {
-	// Set up a trace exporter
+	ctx context.Context,
+	res *resource.Resource,
+	conn *grpc.ClientConn,
+	fractions float64) (func(context.Context) error, error) {
 	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create trace exporter: %w", err)
 	}
 
-	// Register the trace exporter with a TracerProvider, using a batch
-	// span processor to aggregate spans before export.
-
 	tracerProvider := sdktrace.NewTracerProvider(
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithSampler(sdktrace.TraceIDRatioBased(fractions)),
 		sdktrace.WithResource(res),
 		sdktrace.WithBatcher(traceExporter),
 	)
 	otel.SetTracerProvider(tracerProvider)
 
-	// Set global propagator to tracecontext (the default is no-op).
 	otel.SetTextMapPropagator(
 		propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 
@@ -62,7 +57,7 @@ func initTracerProvider(
 	return tracerProvider.Shutdown, nil
 }
 
-func InitTrace(config *domain.Config) func() {
+func InitTrace(config *setting.OtelConfig) func() {
 	logrus.Infof("InitTrace... ")
 
 	if config == nil {
@@ -77,7 +72,7 @@ func InitTrace(config *domain.Config) func() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	conn, err := initConn(config)
+	conn, err := initConn(&setting.Otel)
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -92,7 +87,7 @@ func InitTrace(config *domain.Config) func() {
 		logrus.Fatal(err)
 	}
 
-	shutdownTracerProvider, err := initTracerProvider(ctx, res, conn)
+	shutdownTracerProvider, err := initTracerProvider(ctx, res, conn, config.Fractions)
 	if err != nil {
 		logrus.Fatal(err)
 	}

@@ -30,6 +30,8 @@ import (
 
 	"github.com/gobwas/glob"
 	"github.com/minio/sha256-simd"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+
 )
 
 // Deliver deliver hook task
@@ -277,13 +279,15 @@ func Init() error {
 	}
 	allowedHostMatcher := hostmatcher.ParseHostMatchList("webhook.ALLOWED_HOST_LIST", allowedHostListValue)
 
+	webHookTransport := http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: setting.Webhook.SkipTLSVerify},
+		Proxy:           webhookProxy(allowedHostMatcher),
+		DialContext:     hostmatcher.NewDialContextWithProxy("webhook", allowedHostMatcher, nil, setting.Webhook.ProxyURLFixed),
+	}
+
 	webhookHTTPClient = &http.Client{
 		Timeout: timeout,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: setting.Webhook.SkipTLSVerify},
-			Proxy:           webhookProxy(allowedHostMatcher),
-			DialContext:     hostmatcher.NewDialContextWithProxy("webhook", allowedHostMatcher, nil, setting.Webhook.ProxyURLFixed),
-		},
+		Transport: otelhttp.NewTransport(&webHookTransport),
 	}
 
 	hookQueue = queue.CreateUniqueQueue(graceful.GetManager().ShutdownContext(), "webhook_sender", handler)

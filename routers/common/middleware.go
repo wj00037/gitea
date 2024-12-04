@@ -15,11 +15,12 @@ import (
 	"code.gitea.io/gitea/modules/web/middleware"
 	"code.gitea.io/gitea/modules/web/routing"
 	"code.gitea.io/gitea/utils"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/propagation"
 
 	"gitea.com/go-chi/session"
 	"github.com/chi-middleware/proxy"
 	chi "github.com/go-chi/chi/v5"
-	"go.opentelemetry.io/otel/propagation"
 )
 
 // ProtocolMiddlewares returns HTTP protocol related middlewares, and it provides a global panic recovery
@@ -73,22 +74,30 @@ func ProtocolMiddlewares() (handlers []any) {
 	return handlers
 }
 
-
 // start responce trace
 func ResponseTraceMiddlewares() (handlers []any) {
-	// prepare the ContextData and panic recovery
 	handlers = append(handlers, func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-			ReponseTraceID(resp, req)
+		httpHandler := http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			ResponseTraceID(resp, req)
 			next.ServeHTTP(resp, req)
 		})
+		otelHandler := otelhttp.NewHandler(httpHandler, "otelHttpHandler")
+		return otelHandler
 	})
 	return handlers
 }
 
-func ReponseTraceID(w http.ResponseWriter, r *http.Request) {
-	spanctx, span := utils.Span(r.Context(), "Response Propagation")
+func ResponseTraceID(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/" {
+		return
+	}
+
+	spanctx, span := utils.Span(r.Context(), r.URL.String())
+	if span == nil {
+		return
+	}
 	defer span.End()
+
 	// 4. 应答客户端时， 在 Header 中默认添加 TraceID
 	traceid := span.SpanContext().TraceID().String()
 	addHeader(w, "TraceID", traceid)

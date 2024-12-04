@@ -246,7 +246,7 @@ func runWeb(ctx *cli.Context) error {
 	if setting.EnablePprof {
 		go servePprof()
 	}
-	shutdown := opentelemetry.InitTrace(&setting.OtelTraceConfig)
+	shutdown := opentelemetry.InitTrace(&setting.Otel)
 	defer shutdown()
 
 	return serveInstalled(ctx)

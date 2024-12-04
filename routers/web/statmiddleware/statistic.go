@@ -204,7 +204,7 @@ func GitCloneMessageMiddleware(ctx *context.Context) {
 		adaptedCtx := AdaptGitContext(ctx)
 		msg := prepareMessage(adaptedCtx, gitClone, "this message means someone cloned the repository")
 
-		if err := messagequeue.Publish(setting.MQ.TopicName, &msg, nil); err != nil {
+		if err := messagequeue.Publish(ctx, setting.MQ.TopicName, &msg, nil); err != nil {
 			log.Info("internal error of kafka sender: %s", err.Error())
 		}
 	} else {
@@ -217,7 +217,7 @@ func WebDownloadMiddleware(ctx *context.APIContext) {
 		adaptedCtx := AdaptAPIContext(ctx)
 		msg := prepareMessage(adaptedCtx, webDownload, "this message means someone downloaded a file from the website")
 
-		if err := messagequeue.Publish(setting.MQ.TopicName, &msg, nil); err != nil {
+		if err := messagequeue.Publish(ctx, setting.MQ.TopicName, &msg, nil); err != nil {
 			log.Info("internal error of kafka sender: %s", err.Error())
 		}
 	} else {

@@ -16,7 +16,6 @@ import (
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/config/trace"
 )
 
 // Scheme describes protocol types
@@ -103,8 +102,7 @@ var (
 	StaticURLPrefix            string
 	AbsoluteAssetURL           string
 	CommonMaxFileSize          int64 // `ini:"COMMON_MAX_FILE_SIZE"`
-	OtelTraceConfig            trace.Config
-	ManifestData string
+	ManifestData               string
 )
 
 // MakeManifestData generates web app manifest JSON

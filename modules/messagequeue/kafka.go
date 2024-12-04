@@ -1,23 +1,24 @@
 package messagequeue
 
 import (
+	"context"
 	"encoding/json"
 
 	kfklib "github.com/opensourceways/kafka-lib/agent"
 	"github.com/sirupsen/logrus"
 
 	"code.gitea.io/gitea/modules/setting"
+	"github.com/opensourceways/kafka-lib/mq"
 )
 
 const queueName = "gitea-kafka-queue"
 
-func Publish(topic string, v interface{}, header map[string]string) error {
+func Publish(ctx context.Context, topic string, v interface{}, header map[string]string) error {
 	body, err := json.Marshal(v)
 	if err != nil {
 		return err
 	}
-
-	return kfklib.Publish(topic, header, body)
+	return kfklib.Publish(topic, header, body, mq.PublishContext(ctx))
 }
 
 func retriveConfig(cfg setting.MQConfig) kfklib.Config {

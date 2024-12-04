@@ -34,7 +34,7 @@ type CreateRepoOptions struct {
 	Gitignores     string
 	IssueLabels    string
 	License        string
-	GitTemplate		 string
+	GitTemplate    string
 	Readme         string
 	DefaultBranch  string
 	IsPrivate      bool

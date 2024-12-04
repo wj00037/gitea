@@ -3,15 +3,15 @@ package utils
 import (
 	"context"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"go.opentelemetry.io/otel"
 )
 
 type attrKey string
 
 const (
-	attrkey   attrKey  = "attrkv"
+	attrkey attrKey = "attrkv"
 )
 
 func Span(

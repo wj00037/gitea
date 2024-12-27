@@ -211,16 +211,3 @@ func GitCloneMessageMiddleware(ctx *context.Context) {
 		log.Warn("message queue not initialized, skip publish message")
 	}
 }
-
-func WebDownloadMiddleware(ctx *context.APIContext) {
-	if setting.MQ != nil {
-		adaptedCtx := AdaptAPIContext(ctx)
-		msg := prepareMessage(adaptedCtx, webDownload, "this message means someone downloaded a file from the website")
-
-		if err := messagequeue.Publish(ctx, setting.MQ.TopicName, &msg, nil); err != nil {
-			log.Info("internal error of kafka sender: %s", err.Error())
-		}
-	} else {
-		log.Warn("message queue not initialized, skip publish message")
-	}
-}
